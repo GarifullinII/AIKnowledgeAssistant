@@ -1,17 +1,18 @@
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
 class DocumentBase(BaseModel):
-    filename: str = Field(..., min_length=1)
-    content_type: str | None = None
-    size: int | None = None
+    filename: str = Field(..., min_length=1, description="Name of the downloaded file")
+    content_type: Optional[str] = Field(None, description="MIME file type")
+    size: Optional[int] = Field(None, ge=0, description="File size in bytes")
 
 
 class DocumentResponse(DocumentBase):
-    id: str
-    uploaded_at: datetime
+    id: str = Field(..., description="Unique document identifier")
+    uploaded_at: datetime = Field(..., description="Date and time of upload")
 
 
 class DocumentListResponse(BaseModel):
-    documents: list[DocumentResponse]
+    documents: list[DocumentResponse] = Field(..., description="List of documents")
