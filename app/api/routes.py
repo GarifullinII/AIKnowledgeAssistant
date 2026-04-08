@@ -2,11 +2,13 @@ from fastapi import APIRouter, UploadFile, File
 from app.schemas.query import AskRequest, AskResponse
 from app.services.rag_service import ask_rag
 from app.schemas.document import DocumentResponse, DocumentListResponse
+from app.schemas.chunk import ChunkListResponse
 from app.services.document_service import (
     save_uploaded_document,
     list_documents,
     validate_upload_file
 )
+from app.services.chunk_service import get_chunks_by_document_id
 
 router = APIRouter()
 
@@ -33,3 +35,8 @@ async def upload_document(file: UploadFile = File(...)):
 @router.get("/documents", response_model=DocumentListResponse)
 def get_documents():
     return DocumentListResponse(documents=list_documents())
+
+@router.get("/documents/{document_id}/chunks", response_model=ChunkListResponse)
+def get_document_chunks(document_id: str):
+    chunks = get_chunks_by_document_id(document_id)
+    return ChunkListResponse(chunks=chunks)

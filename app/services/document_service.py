@@ -6,6 +6,7 @@ from pypdf import PdfReader
 
 from app.core.config import settings
 from app.db.memory_store import documents_store
+from app.services.chunk_service import split_into_chunks, save_chunks
 
 
 ALLOWED_CONTENT_TYPES = {
@@ -103,6 +104,15 @@ async def save_uploaded_document(file: UploadFile) -> dict:
     }
 
     documents_store.append(document)
+
+    chunks = split_into_chunks(
+        text=extracted_text,
+        document_id=document_id,
+        chunk_size=800,
+        overlap=150
+    )
+    save_chunks(chunks)
+
     return document
 
 
