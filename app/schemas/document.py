@@ -12,6 +12,9 @@ class DocumentBase(BaseModel):
 class DocumentResponse(DocumentBase):
     id: str = Field(..., description="Unique document identifier")
     uploaded_at: datetime = Field(..., description="Date and time of upload")
+    stored_path: str = Field(..., description="Path where the file is stored")
+    text_length: int = Field(..., ge=0, description="Number of extracted text characters")
+    preview: str = Field(..., description="Short preview of the document text")
 
 
 class DocumentListResponse(BaseModel):
