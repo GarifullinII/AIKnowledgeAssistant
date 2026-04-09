@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, BackgroundTasks, UploadFile, File
 from app.schemas.query import AskRequest, AskResponse
 from app.services.rag_service import ask_rag
 from app.schemas.document import DocumentResponse, DocumentListResponse
@@ -8,7 +8,7 @@ from app.services.document_service import (
     list_documents,
     validate_upload_file
 )
-from app.services.chunk_service import get_chunks_by_document_id
+from app.services.chunk_service import enrich_document_chunks_with_embeddings, get_chunks_by_document_id
 
 router = APIRouter()
 
@@ -27,9 +27,10 @@ def ask_question(payload: AskRequest):
     return AskResponse(**result)
 
 @router.post("/upload", response_model=DocumentResponse)
-async def upload_document(file: UploadFile = File(...)):
+async def upload_document(background_tasks: BackgroundTasks,file: UploadFile = File(...)):
     validate_upload_file(file)
     document = await save_uploaded_document(file)
+    background_tasks.add_task(enrich_document_chunks_with_embeddings, document["id"])
     return DocumentResponse(**document)
 
 @router.get("/documents", response_model=DocumentListResponse)

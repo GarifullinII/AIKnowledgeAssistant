@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 from fastapi import UploadFile, HTTPException
@@ -6,7 +6,10 @@ from pypdf import PdfReader
 
 from app.core.config import settings
 from app.db.memory_store import documents_store
-from app.services.chunk_service import split_into_chunks, save_chunks
+from app.services.chunk_service import (
+    split_into_chunks,
+    save_chunks,
+)
 
 
 ALLOWED_CONTENT_TYPES = {
