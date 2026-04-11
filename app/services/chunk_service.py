@@ -1,6 +1,8 @@
-from uuid import uuid4
+import json
 from math import sqrt
-from app.db.memory_store import chunks_store
+from uuid import uuid4
+from sqlalchemy.orm import Session
+from app.db.models import Chunk
 from app.services.embedding_service import get_text_embedding
 
 
@@ -52,14 +54,6 @@ def enrich_chunks_with_embeddings(chunks: list[dict]) -> list[dict]:
     return enriched_chunks
 
 
-def save_chunks(chunks: list[dict]) -> None:
-    chunks_store.extend(chunks)
-
-
-def get_chunks_by_document_id(document_id: str) -> list[dict]:
-    return [chunk for chunk in chunks_store if chunk["document_id"] == document_id]
-
-
 def cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
     if not vec1 or not vec2 or len(vec1) != len(vec2):
         return 0.0
@@ -74,46 +68,50 @@ def cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
     return dot_product / (norm1 * norm2)
 
 
+def get_chunks_by_document_id(document_id: str, db: Session) -> list[dict]:
+    chunks = (
+        db.query(Chunk)
+        .filter(Chunk.document_id == document_id)
+        .order_by(Chunk.chunk_index.asc())
+        .all()
+    )
+
+    return [
+        {
+            "chunk_id": chunk.chunk_id,
+            "document_id": chunk.document_id,
+            "chunk_index": chunk.chunk_index,
+            "text": chunk.text,
+        }
+        for chunk in chunks
+    ]
+
+
 def search_similar_chunks(
     question_embedding: list[float],
+    db: Session,
     document_id: str | None = None,
     top_k: int = 3,
 ) -> list[dict]:
-    candidate_chunks = chunks_store
+    query = db.query(Chunk)
 
     if document_id:
-        candidate_chunks = [
-            chunk for chunk in chunks_store
-            if chunk["document_id"] == document_id
-        ]
+        query = query.filter(Chunk.document_id == document_id)
+
+    candidate_chunks = query.all()
 
     scored_chunks = []
     for chunk in candidate_chunks:
-        similarity = cosine_similarity(question_embedding, chunk["embedding"])
+        chunk_embedding = json.loads(chunk.embedding_json)
+        similarity = cosine_similarity(question_embedding, chunk_embedding)
+
         scored_chunks.append({
-            **chunk,
+            "chunk_id": chunk.chunk_id,
+            "document_id": chunk.document_id,
+            "chunk_index": chunk.chunk_index,
+            "text": chunk.text,
             "similarity": similarity,
         })
 
     scored_chunks.sort(key=lambda x: x["similarity"], reverse=True)
     return scored_chunks[:top_k]
-
-
-def enrich_document_chunks_with_embeddings(document_id: str) -> None:
-    chunks = get_chunks_by_document_id(document_id)
-
-    if not chunks:
-        return
-
-    for chunk in chunks:
-        if chunk.get("embedding"):
-            continue
-
-        text = chunk.get("text", "").strip()
-        if not text:
-            chunk["embedding"] = []
-            continue
-
-        embedding = get_text_embedding(text)
-        chunk["embedding"] = embedding
-

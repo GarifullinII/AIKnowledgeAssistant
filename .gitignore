@@ -30,3 +30,14 @@ htmlcov/
 # Local environment files
 .env
 .env.*
+
+# Uploaded user files and local app data
+data/uploads/
+
+# Local database and cache artifacts
+*.db
+*.sqlite3
+dump.rdb
+
+# Python runtime artifacts
+*.log
