@@ -1,5 +1,3 @@
-import json
-from math import sqrt
 from uuid import uuid4
 from sqlalchemy.orm import Session
 from app.db.models import Chunk
@@ -54,20 +52,6 @@ def enrich_chunks_with_embeddings(chunks: list[dict]) -> list[dict]:
     return enriched_chunks
 
 
-def cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
-    if not vec1 or not vec2 or len(vec1) != len(vec2):
-        return 0.0
-
-    dot_product = sum(a * b for a, b in zip(vec1, vec2))
-    norm1 = sqrt(sum(a * a for a in vec1))
-    norm2 = sqrt(sum(b * b for b in vec2))
-
-    if norm1 == 0 or norm2 == 0:
-        return 0.0
-
-    return dot_product / (norm1 * norm2)
-
-
 def get_chunks_by_document_id(document_id: str, db: Session) -> list[dict]:
     chunks = (
         db.query(Chunk)
@@ -85,33 +69,3 @@ def get_chunks_by_document_id(document_id: str, db: Session) -> list[dict]:
         }
         for chunk in chunks
     ]
-
-
-def search_similar_chunks(
-    question_embedding: list[float],
-    db: Session,
-    document_id: str | None = None,
-    top_k: int = 3,
-) -> list[dict]:
-    query = db.query(Chunk)
-
-    if document_id:
-        query = query.filter(Chunk.document_id == document_id)
-
-    candidate_chunks = query.all()
-
-    scored_chunks = []
-    for chunk in candidate_chunks:
-        chunk_embedding = json.loads(chunk.embedding_json)
-        similarity = cosine_similarity(question_embedding, chunk_embedding)
-
-        scored_chunks.append({
-            "chunk_id": chunk.chunk_id,
-            "document_id": chunk.document_id,
-            "chunk_index": chunk.chunk_index,
-            "text": chunk.text,
-            "similarity": similarity,
-        })
-
-    scored_chunks.sort(key=lambda x: x["similarity"], reverse=True)
-    return scored_chunks[:top_k]

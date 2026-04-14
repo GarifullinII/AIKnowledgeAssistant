@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     redis_db: int = 0
     redis_url: str = "redis://localhost:6379/0"
 
+    qdrant_host: str = "localhost"
+    qdrant_port: int = 6333
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_collection_name: str = "document_chunks"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8"

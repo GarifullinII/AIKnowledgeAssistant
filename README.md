@@ -184,3 +184,13 @@ AIKnowledgeAssistant/
 - `db` - подключение к базе данных и ORM-модели документов и чанков;
 - `core` - конфигурация приложения;
 - `data/uploads` - каталог, в который сохраняются загруженные файлы.
+
+## Обновление за сегодня
+
+- добавлен `Qdrant` как внешнее векторное хранилище для semantic search;
+- создан сервис `app/services/vector_store_service.py` для создания коллекции, загрузки чанков и vector retrieval;
+- после загрузки документа чанки теперь отправляются не только в `PostgreSQL`, но и в `Qdrant`;
+- endpoint `/api/ask` переведен с локального cosine similarity по `PostgreSQL` на retrieval через `Qdrant`;
+- в конфиг добавлены `QDRANT_HOST`, `QDRANT_PORT`, `QDRANT_URL` и `QDRANT_COLLECTION_NAME`;
+- в `docker-compose.yml` добавлен отдельный сервис `qdrant`;
+- в `requirements.txt` добавлена зависимость `qdrant-client`.

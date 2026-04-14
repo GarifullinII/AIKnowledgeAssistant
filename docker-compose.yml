@@ -11,6 +11,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - qdrant
 
   postgres:
     image: postgres:17
@@ -32,6 +33,16 @@ services:
     volumes:
       - redis_data:/data
 
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: ai_knowledge_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
 volumes:
   postgres_data:
   redis_data:
+  qdrant_data:

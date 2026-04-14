@@ -6,6 +6,7 @@ from uuid import uuid4
 from fastapi import UploadFile, HTTPException
 from pypdf import PdfReader
 from sqlalchemy.orm import Session
+from app.services.vector_store_service import upsert_chunks_to_qdrant
 
 from app.core.config import settings
 from app.db.models import Document, Chunk
@@ -136,6 +137,8 @@ async def save_uploaded_document(file: UploadFile, db: Session) -> dict:
         db.add(db_chunk)
 
     db.commit()
+
+    upsert_chunks_to_qdrant(chunks_with_embeddings)
 
     return {
         "id": db_document.id,
