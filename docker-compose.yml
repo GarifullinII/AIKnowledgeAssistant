@@ -28,6 +28,19 @@ services:
       - redis
       - qdrant
 
+  worker:
+    build: .
+    container_name: ai_knowledge_worker
+    command: ["python", "-m", "app.worker"]
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - postgres
+      - redis
+      - qdrant
+
 
   postgres:
     image: postgres:17

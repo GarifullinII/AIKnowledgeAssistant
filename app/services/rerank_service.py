@@ -1,8 +1,6 @@
 import json
-from openai import OpenAI
 from app.core.config import settings
-
-client = OpenAI(api_key=settings.openai_api_key)
+from app.services.openai_service import client, run_with_openai_retry
 
 
 def rerank_chunks(question: str, candidate_chunks: list[dict], top_n: int = 3) -> list[dict]:
@@ -40,9 +38,12 @@ def rerank_chunks(question: str, candidate_chunks: list[dict], top_n: int = 3) -
 [3, 1, 2]
 """
 
-    response = client.responses.create(
-        model=settings.openai_chat_model,
-        input=prompt,
+    response = run_with_openai_retry(
+        lambda: client.responses.create(
+            model=settings.openai_chat_model,
+            input=prompt,
+        ),
+        action_name="chunk rerank",
     )
 
     output_text = response.output_text.strip()

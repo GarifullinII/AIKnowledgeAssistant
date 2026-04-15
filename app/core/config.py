@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     openai_api_key: str
     openai_embedding_model: str = "text-embedding-3-small"
     openai_chat_model: str = "gpt-4.1-mini"
+    openai_timeout_seconds: float = 60.0
+    openai_retry_attempts: int = 3
+    openai_retry_base_delay_seconds: float = 1.0
 
     postgres_db: str = "aiknowledgeassistant"
     postgres_user: str = "postgres"
@@ -28,6 +31,7 @@ class Settings(BaseSettings):
     qdrant_port: int = 6333
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection_name: str = "document_chunks"
+    document_queue_name: str = "document_processing"
 
     telegram_bot_token: str = ""
     telegram_default_document_id: str = ""

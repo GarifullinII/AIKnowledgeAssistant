@@ -15,6 +15,9 @@ class DocumentResponse(DocumentBase):
     stored_path: str = Field(..., description="Path where the file is stored")
     text_length: int = Field(..., ge=0, description="Number of extracted text characters")
     preview: str = Field(..., description="Short preview of the document text")
+    processing_status: str = Field(..., description="Document processing status")
+    processing_error: Optional[str] = Field(None, description="Document processing error")
+    source: Optional[str] = Field(None, description="Document upload source")
 
 
 class DocumentListResponse(BaseModel):

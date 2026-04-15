@@ -1,7 +1,5 @@
-from openai import OpenAI
 from app.core.config import settings
-
-client = OpenAI(api_key=settings.openai_api_key)
+from app.services.openai_service import client, run_with_openai_retry
 
 
 def get_text_embedding(text: str) -> list[float]:
@@ -9,9 +7,12 @@ def get_text_embedding(text: str) -> list[float]:
     if not clean_text:
         return []
 
-    response = client.embeddings.create(
-        model=settings.openai_embedding_model,
-        input=clean_text
+    response = run_with_openai_retry(
+        lambda: client.embeddings.create(
+            model=settings.openai_embedding_model,
+            input=clean_text,
+        ),
+        action_name="embedding generation",
     )
 
     return response.data[0].embedding

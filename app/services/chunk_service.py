@@ -1,4 +1,3 @@
-from uuid import uuid4
 from sqlalchemy.orm import Session
 from app.db.models import Chunk
 from app.services.embedding_service import get_text_embedding
@@ -24,7 +23,7 @@ def split_into_chunks(
 
         if chunk_text:
             chunk = {
-                "chunk_id": str(uuid4()),
+                "chunk_id": f"{document_id}:{chunk_index}",
                 "document_id": document_id,
                 "chunk_index": chunk_index,
                 "text": chunk_text,

@@ -8,5 +8,6 @@ openai
 sqlalchemy
 psycopg[binary]
 redis
+rq
 qdrant-client==1.9.1
 python-telegram-bot==21.11.1

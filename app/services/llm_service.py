@@ -1,7 +1,5 @@
-from openai import OpenAI
 from app.core.config import settings
-
-client = OpenAI(api_key=settings.openai_api_key)
+from app.services.openai_service import client, run_with_openai_retry
 
 
 def generate_answer(question: str, context_chunks: list[dict]) -> str:
@@ -29,9 +27,12 @@ You are an assistant who responds only based on the context provided.
 {question}
 """
 
-    response = client.responses.create(
-        model=settings.openai_chat_model,
-        input=prompt
+    response = run_with_openai_retry(
+        lambda: client.responses.create(
+            model=settings.openai_chat_model,
+            input=prompt,
+        ),
+        action_name="answer generation",
     )
 
     return response.output_text.strip()

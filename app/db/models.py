@@ -18,6 +18,9 @@ class Document(Base):
     text_length: Mapped[int] = mapped_column(Integer, nullable=False)
     preview: Mapped[str] = mapped_column(Text, nullable=False)
     full_text: Mapped[str] = mapped_column(Text, nullable=False)
+    processing_status: Mapped[str] = mapped_column(String, nullable=False, default="queued")
+    processing_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source: Mapped[str | None] = mapped_column(String, nullable=True)
 
     chunks: Mapped[list["Chunk"]] = relationship(
         back_populates="document",

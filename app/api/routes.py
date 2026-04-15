@@ -10,6 +10,7 @@ from app.services.document_service import (
     validate_upload_file,
     get_document_by_id,
 )
+from app.services.queue_service import enqueue_document_processing
 from app.services.chunk_service import get_chunks_by_document_id
 from app.db.database import get_db
 
@@ -38,6 +39,7 @@ async def upload_document(
 ):
     validate_upload_file(file)
     document = await save_uploaded_document(file, db)
+    enqueue_document_processing(document["id"])
     return DocumentResponse(**document)
 
 
