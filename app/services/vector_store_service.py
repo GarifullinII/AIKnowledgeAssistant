@@ -53,6 +53,15 @@ def search_qdrant(
     document_id: str | None = None,
     top_k: int = 5,
 ) -> list[dict]:
+    if not question_embedding:
+        return []
+
+    existing_collections = qdrant_client.get_collections().collections
+    existing_names = [collection.name for collection in existing_collections]
+
+    if settings.qdrant_collection_name not in existing_names:
+        return []
+
     query_filter = None
 
     if document_id:
@@ -67,16 +76,15 @@ def search_qdrant(
             ]
         )
 
-    response = qdrant_client.query_points(
-    collection_name=settings.qdrant_collection_name,
-    query=question_embedding,
-    query_filter=query_filter,
-    limit=top_k,
-)
-
+    results = qdrant_client.search(
+        collection_name=settings.qdrant_collection_name,
+        query_vector=question_embedding,
+        query_filter=query_filter,
+        limit=top_k,
+    )
 
     chunks = []
-    for result in response.points:
+    for result in results:
         chunks.append(
             {
                 "chunk_id": str(result.id),
@@ -88,3 +96,4 @@ def search_qdrant(
         )
 
     return chunks
+

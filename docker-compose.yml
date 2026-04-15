@@ -12,6 +12,22 @@ services:
       - postgres
       - redis
       - qdrant
+      
+  bot:
+    build: .
+    container_name: ai_knowledge_bot
+    command: ["python", "-m", "app.bot"]
+    profiles: ["bot"]
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - app
+      - postgres
+      - redis
+      - qdrant
+
 
   postgres:
     image: postgres:17
