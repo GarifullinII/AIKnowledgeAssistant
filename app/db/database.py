@@ -10,6 +10,7 @@ class Base(DeclarativeBase):
 engine = create_engine(
     settings.database_url,
     echo=False,
+    connect_args={"prepare_threshold": None},
 )
 
 SessionLocal = sessionmaker(
